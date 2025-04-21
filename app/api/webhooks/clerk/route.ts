@@ -50,7 +50,8 @@ export async function POST(req: Request) {
 
   // Process event types
   try {
-    const { id, type: eventType } = evt;
+    const eventType = evt.type;
+    const { id } = evt.data; // Fix: access id from evt.data instead of evt
 
     // CREATE - Most likely to timeout
     if (eventType === "user.created") {
@@ -65,7 +66,7 @@ export async function POST(req: Request) {
       }
 
       const userData = {
-        clerkId: id,
+        clerkId: id,  // Use the correctly accessed id
         email,
         username: username || email.split('@')[0],
         firstName: first_name || '',

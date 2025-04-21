@@ -181,7 +181,7 @@ export async function getUserImages({
   }
 }
 
-export async function someImageAction() {
+export async function someImageAction({ image, userId, path }: UpdateImageParams) {
   try {
     await connectToDatabase();
 

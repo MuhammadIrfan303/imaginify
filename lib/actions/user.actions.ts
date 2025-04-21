@@ -11,10 +11,24 @@ export async function createUser(user: CreateUserParams) {
   try {
     await connectToDatabase();
 
-    const newUser = await User.create(user);
+    // Check if user already exists
+    const existingUser = await User.findOne({ clerkId: user.clerkId });
+    if (existingUser) {
+      throw new Error("User already exists");
+    }
+
+    // Add default credit balance for new users
+    const userWithCredits = {
+      ...user,
+      creditBalance: 10 // Default credits for new users
+    };
+
+    const newUser = await User.create(userWithCredits);
+    console.log("User created successfully:", newUser); // Add logging
 
     return JSON.parse(JSON.stringify(newUser));
   } catch (error) {
+    console.error("Error in createUser:", error); // Add detailed error logging
     handleError(error);
   }
 }

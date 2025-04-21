@@ -60,36 +60,39 @@ export async function POST(req: Request) {
 
   // CREATE
   if (eventType === "user.created") {
-    // Ensure database connection
+    // Ensure database connection first
     await connectToDatabase();
 
     const { id, email_addresses, image_url, first_name, last_name, username } = evt.data;
 
-    const user = {
-      clerkId: id,
-      email: email_addresses[0].email_address,
-      username: username!,
-      firstName: first_name,
-      lastName: last_name,
-      photo: image_url,
-      creditBalance: 10, // Add default credits for new users
-    };
-
-    const newUser = await createUser(user);
-
-    if (!newUser) {
-      console.error("Failed to create user in MongoDB");
-      return NextResponse.json({ message: "Failed to create user" }, { status: 500 });
-    }
-
-    // Set public metadata
-    await clerkClient.users.updateUserMetadata(id, {
-      publicMetadata: {
-        userId: newUser._id,
-      },
+    // Add debug logging
+    console.log("Webhook received user.created event:", {
+      id,
+      email: email_addresses?.[0]?.email_address,
+      username,
+      photo: image_url
     });
 
-    return NextResponse.json({ message: "OK", user: newUser });
+    const user = {
+      clerkId: id,
+      email: email_addresses?.[0]?.email_address,
+      username: username || email_addresses?.[0]?.email_address?.split('@')[0],
+      firstName: first_name || '',
+      lastName: last_name || '',
+      photo: image_url || '',
+      creditBalance: 10
+    };
+
+    // Validate required fields
+    if (!user.clerkId || !user.email || !user.username) {
+      console.error("Missing required user data:", user);
+      return new Response("Missing required user data", { status: 400 });
+    }
+
+    const newUser = await createUser(user);
+    console.log("User created in MongoDB:", newUser);
+
+    return new Response("User created successfully", { status: 200 });
   }
 
   // UPDATE

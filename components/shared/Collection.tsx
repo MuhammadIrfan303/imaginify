@@ -21,11 +21,11 @@ import { Search } from "./Search";
 
 export const Collection = ({
   hasSearch = false,
-  images,
+  images = [], // Add default empty array
   totalPages = 1,
   page,
 }: {
-  images: IImage[];
+  images?: IImage[]; // Make images optional
   totalPages?: number;
   page: number;
   hasSearch?: boolean;
@@ -53,7 +53,8 @@ export const Collection = ({
         {hasSearch && <Search />}
       </div>
 
-      {images.length > 0 ? (
+      {/* Add null check for images */}
+      {images && images.length > 0 ? (
         <ul className="collection-list">
           {images.map((image) => (
             <Card image={image} key={image._id} />
@@ -113,11 +114,10 @@ const Card = ({ image }: { image: IImage }) => {
             {image.title}
           </p>
           <Image
-            src={`/assets/icons/${
-              transformationTypes[
+            src={`/assets/icons/${transformationTypes[
                 image.transformationType as TransformationTypeKey
               ].icon
-            }`}
+              }`}
             alt={image.title}
             width={24}
             height={24}
